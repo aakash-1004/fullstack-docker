@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    container_name: flask-backend
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./backend/.env
+    networks:
+      - app-network
+    restart: always
+
+  frontend:
+    build: ./frontend
+    container_name: express-frontend
+    ports:
+      - "3001:3000"
+    environment:
+      - FLASK_BACKEND=http://backend:5000
+    depends_on:
+      - backend
+    networks:
+      - app-network
+    restart: always
+
+networks:
+  app-network:
+    driver: bridge
