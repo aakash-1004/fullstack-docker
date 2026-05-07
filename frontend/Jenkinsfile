@@ -1,0 +1,43 @@
+pipeline {
+    agent any
+
+    environment {
+        APP_DIR = '/home/ubuntu/apps/express-app/frontend'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main',
+                    url: 'https://github.com/aakash-1004/fullstack-docker.git'
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                sh '''
+                    cd ${WORKSPACE}/frontend
+                    npm install
+                '''
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                sh '''
+                    sudo -u ubuntu cp -r ${WORKSPACE}/frontend/* ${APP_DIR}/
+                    sudo -u ubuntu /usr/lib/node_modules/pm2/bin/pm2 restart express-app
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Express deployment successful'
+        }
+        failure {
+            echo 'Express deployment failed'
+        }
+    }
+}
